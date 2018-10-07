@@ -1,0 +1,22 @@
+{'ok': True,
+ 'result': [{'inline_query': {'from': {'first_name': 'Mathieu',
+                                       'id': 192165868,
+                                       'is_bot': False,
+                                       'language_code': 'fr-FR'},
+                              'id': '825346121524959727',
+                              'offset': '',
+                              'query': 'salut toi'},
+             'update_id': 105278861}]}
+
+{'ok': True,
+ 'result': [{'message': {'chat': {'first_name': 'Mathieu',
+                                  'id': 192165868,
+                                  'type': 'private'},
+                         'date': 1538948390,
+                         'from': {'first_name': 'Mathieu',
+                                  'id': 192165868,
+                                  'is_bot': False,
+                                  'language_code': 'fr-FR'},
+                         'message_id': 6,
+                         'text': 'toto'},
+             'update_id': 105278872}]}
