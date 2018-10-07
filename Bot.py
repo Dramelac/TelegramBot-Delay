@@ -43,7 +43,7 @@ class Bot:
         # Debug log
         if not silent:
             print("[API ", method, "] Requesting : ", path, sep='')
-            print("[API ", method, "] Result : ", sep=' ')
+            print("[API ", method, "] Result : ", sep='')
 
         result = f.json()
         if not silent:
