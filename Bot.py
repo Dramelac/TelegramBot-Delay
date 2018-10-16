@@ -1,6 +1,8 @@
 from pprint import pprint
 
 import requests
+import re
+import sched, time
 
 
 class Bot:
@@ -82,14 +84,51 @@ class Bot:
             # Send Hello message
             if txt == "/start" or txt == "/help":
                 self.print_help(chat_id)
+            elif re.match(r"^@", txt):
+                resp = self.handle_query(txt, chat_id)
+                self.send_message(resp, chat_id)
             else:
                 self.send_message("Hello " + from_name, chat_id)
         # Inline message handling
         elif message.get("inline_query") is not None:
-            pass
+            response = self.handle_query(message["inline_query"]["query"])
+            print('Response:', response)
+
+    def handle_query(self, query, chat_id=None):
+        print("Using arg:", query)
+        rule = r"(\d+)\s?(\w+)\s(.+)"
+        reout = re.match(rule, query)
+        if reout is None:
+            return self.get_syntax_error()
+        try:
+            time_nb = int(reout.group(1))
+            time_type = reout.group(2)
+            msg = reout.group(3)
+        except IndexError:
+            return self.get_syntax_error()
+
+        delay_time = time_nb
+        if time_type == "mn" or time_type == "m":
+            delay_time = time_nb * 60
+        elif time_type == "hr" or time_type == "h":
+            delay_time = time_nb * 3600
+
+        if chat_id is not None:
+            self.schedule_message(msg, delay_time, chat_id)
+        else:
+            print("[DEBUG] Send", msg, "delayed", time_nb, delay_time)
+
+        return "Query saved !"
+
+    def schedule_message(self, msg, seconds, chat_id):
+        pass
+
+    @staticmethod
+    def get_syntax_error():
+        return "Syntax Error. Argument error. Exemple : \"5mn message\", \"24h message\""
 
     def send_message(self, msg, chat_id):
-        result = self.__request_API("sendMessage", method="POST", data={'text': msg, "chat_id": chat_id})
+        return self.__request_API("sendMessage", method="POST", data={'text': msg, "chat_id": chat_id})
 
     def print_help(self, chat_id):
         help_msg = "Bonjour !\n" \
