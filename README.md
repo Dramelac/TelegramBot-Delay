@@ -21,3 +21,6 @@ Example :
 
 The message "Lorem ipsum" will be sent back in 5 minutes
 
+### Support
+Tested with Python 3.6
+
