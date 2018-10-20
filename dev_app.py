@@ -1,5 +1,6 @@
-from Bot import Bot
 import time
+
+from Bot import Bot
 
 # Dev app - pooling messages
 
@@ -9,6 +10,6 @@ if __name__ == '__main__':
     try:
         while True:
             bot.pool_message()
-            time.sleep(3)
+            time.sleep(2)
     except KeyboardInterrupt:
         print("Exiting")
