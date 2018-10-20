@@ -38,9 +38,8 @@ class MessageQuery:
                 return self.__print_help_fr(), self.chat_id
             else:
                 return self.__print_help_en(), self.chat_id
-        elif self.__hello_match():
-
-            return 'Hello ' + self.username, self.chat_id
+        elif self.__hello_match() is not None:
+            return self.__hello_match(), self.chat_id
         else:
             return self.__handle_query(), self.chat_id
 
@@ -81,23 +80,32 @@ class MessageQuery:
         return "Query saved !"
 
     def __hello_match(self):
-        pass
+        if re.match(r'^([hH][ea]llo|[hH]i|[gG]ood|[Hh]ey)( ?.*)?', self.text):
+            resp = "Hello " + self.username
+            resp += " !" if re.match(r'.*!$', self.text) else ""
+            return resp
+        elif re.match(r'^([sS]alut|[cC](ou)?[cC](ou)?|[bB]onjour|[Yy][oO]p?)( ?.*)?', self.text):
+            resp = "Bonjour " + self.username
+            resp += " !" if re.match(r'.*!$', self.text) else ""
+            return resp
+        else:
+            return None
 
     def __print_help_fr(self):
         return "Bonjour " + self.username + " !\n" \
-                                                 "Je suis @MrDelayBot !\n" \
-                                                 "Je peux vous envoyer des messages dans le futur !\n" \
-                                                 "Syntax : \n" \
-                                                 "   \"10s ce message me sera envoyé dans 10 secondes\"\n" \
-                                                 "   \"1j ce message me sera envoyé dans 1 jour\""
+                                            "Je suis @MrDelayBot !\n" \
+                                            "Je peux vous envoyer des messages dans le futur !\n" \
+                                            "Syntax : \n" \
+                                            "   \"10s ce message me sera envoyé dans 10 secondes\"\n" \
+                                            "   \"1j ce message me sera envoyé dans 1 jour\""
 
     def __print_help_en(self):
         return "Hello " + self.username + " !\n" \
-                                               "I'm @MrDelayBot !\n" \
-                                               "I can send you message in the futur !\n" \
-                                               "Syntax : \n" \
-                                               "   \"10s this message will be sent to you in 10 seconds\"\n" \
-                                               "   \"1d this message will be sent to you in 1 day\""
+                                          "I'm @MrDelayBot !\n" \
+                                          "I can send you message in the futur !\n" \
+                                          "Syntax : \n" \
+                                          "   \"10s this message will be sent to you in 10 seconds\"\n" \
+                                          "   \"1d this message will be sent to you in 1 day\""
 
     @staticmethod
     def __get_syntax_error():
