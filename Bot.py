@@ -76,9 +76,16 @@ class Bot:
         for msg in result["result"]:
             self.__update_id = msg["update_id"] + 1
             query = MessageQuery(msg, self)
-            resp, chat_id = query.handle()
-            if resp is not None:
-                self.__send_message(resp, chat_id)
+            try:
+                resp, chat_id = query.handle()
+                if resp is not None:
+                    self.__send_message(resp, chat_id)
+            except Exception as e:
+                print("[ERROR] Exception occurred !", e)
+                tmp = msg.get("message")
+                if tmp is not None:
+                    if tmp.get("chat") is not None:
+                        self.__send_message("An error occurred", tmp["chat"]["id"])
 
     def schedule_message(self, msg, seconds, chat_id):
         self.task_count += 1

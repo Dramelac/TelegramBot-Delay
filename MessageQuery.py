@@ -22,7 +22,7 @@ class MessageQuery:
     def handle(self):
         # Message handling
         if not self.is_inline:
-            return self.__handle_message()
+            return self.__handle_message(), self.chat_id
 
         # Inline message handling
         else:
@@ -35,13 +35,15 @@ class MessageQuery:
         # Send Hello message
         if self.text == "/start" or self.text == "/help":
             if self.lang == 'fr-FR' or self.lang == "fr":
-                return self.__print_help_fr(), self.chat_id
+                return self.__print_help_fr()
             else:
-                return self.__print_help_en(), self.chat_id
+                return self.__print_help_en()
+        elif self.text == "ping":
+            return "pong"
         elif self.__hello_match() is not None:
-            return self.__hello_match(), self.chat_id
+            return self.__hello_match()
         else:
-            return self.__handle_query(), self.chat_id
+            return self.__handle_query()
 
     def __handle_query(self):
         rule = r"(\d+)\s?(\w+)\s(.+)"
