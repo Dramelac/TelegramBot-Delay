@@ -85,6 +85,7 @@ class Bot:
                     self.__send_message(resp, chat_id)
             except Exception as e:
                 print("[ERROR] Exception occurred !", e)
+                pprint(msg)
                 tmp = msg.get("message")
                 if tmp is not None:
                     if tmp.get("chat") is not None:

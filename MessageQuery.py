@@ -6,6 +6,7 @@ class MessageQuery:
 
     def __init__(self, msg, bot):
         self.bot = bot
+        self.debug_msg = msg
         self.is_edit = False
         self.is_inline = None
 
@@ -27,14 +28,26 @@ class MessageQuery:
 
         if not self.is_inline:
             self.text = msg.get("text")
+            self.sticker = msg.get("sticker")
+            self.document = msg.get("document")
+            self.animation = msg.get("animation")
+            self.photo = msg.get("photo")
             self.chat_id = msg["chat"]["id"]
 
         self.username = msg["from"]["first_name"]
         self.lang = msg["from"].get("language_code")
 
+    def print_debug(self):
+        print("[DEBUG] Printing message data raw:")
+        pprint(self.debug_msg)
+
     def handle(self):
         if self.is_edit:
             return "Command editing is not yet supported :'(", self.chat_id
+
+        check = self.__type_error()
+        if check is not None:
+            return check, self.chat_id
 
         # Message handling
         if not self.is_inline:
@@ -47,6 +60,26 @@ class MessageQuery:
             # TODO inline response
             return None
         return None
+
+    def __type_error(self):
+        if self.text is None:
+            msg = ""
+            if self.sticker is not None:
+                msg += "Stickers are"
+            elif self.animation is not None:
+                msg += "GIF are"
+            elif self.document is not None:
+                msg += "Documents are"
+            elif self.photo is not None:
+                msg += "Pictures are"
+            else:
+                print("[DEBUG] Unrecognized message type")
+                self.print_debug()
+                msg += "This message is"
+            msg += " not yet supported :'("
+            return msg
+        else:
+            return None
 
     def __handle_message(self):
         # Send Hello message
