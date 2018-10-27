@@ -1,35 +1,52 @@
 import re
+from pprint import pprint
 
 
 class MessageQuery:
 
     def __init__(self, msg, bot):
         self.bot = bot
+        self.is_edit = False
+        self.is_inline = None
 
         if msg.get("message") is not None:
             msg = msg["message"]
-            self.text = msg.get("text")
-            self.chat_id = msg["chat"]["id"]
             self.is_inline = False
-        else:
+        elif msg.get("edited_message") is not None:
+            msg = msg["edited_message"]
+            self.is_inline = False
+            self.is_edit = True
+        elif msg.get("inline_query"):
             msg = msg["inline_query"]
             self.text = msg["inline_query"]["query"]
             self.is_inline = True
+        else:
+            print("[ERROR] Message type not supported")
+            pprint(msg)
+            return
+
+        if not self.is_inline:
+            self.text = msg.get("text")
+            self.chat_id = msg["chat"]["id"]
 
         self.username = msg["from"]["first_name"]
         self.lang = msg["from"].get("language_code")
 
     def handle(self):
+        if self.is_edit:
+            return "Command editing is not yet supported :'(", self.chat_id
+
         # Message handling
         if not self.is_inline:
             return self.__handle_message(), self.chat_id
 
         # Inline message handling
-        else:
+        elif self.is_inline:
             response = self.__handle_query()
             print('Response:', response)
             # TODO inline response
             return None
+        return None
 
     def __handle_message(self):
         # Send Hello message

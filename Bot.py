@@ -73,7 +73,10 @@ class Bot:
         self.__update_id = None
 
         # Handle messages
-        for msg in result["result"]:
+        if result.get("result") is None:
+            pprint("[DEBUG] Unknown message:", result)
+            return
+        for msg in result.get("result", []):
             self.__update_id = msg["update_id"] + 1
             query = MessageQuery(msg, self)
             try:
