@@ -164,4 +164,4 @@ class MessageQuery:
         return "Syntax Error. Please follow the correct \n" \
                "Exemple :\n" \
                "  \"5mn your message\"\n" \
-               " \"24h your message\""
+               "  \"24h your message\""
