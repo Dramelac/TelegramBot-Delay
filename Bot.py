@@ -74,7 +74,8 @@ class Bot:
 
         # Handle messages
         if result.get("result") is None:
-            pprint("[DEBUG] Unknown message:", result)
+            print("[DEBUG] Unknown message:")
+            pprint(result)
             return
         for msg in result.get("result", []):
             self.__update_id = msg["update_id"] + 1
