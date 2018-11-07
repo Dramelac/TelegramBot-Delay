@@ -13,8 +13,6 @@ class MessageQuery:
         self.new_users = None
         self.group_name = None
 
-        pprint(msg)
-
         if msg.get("message") is not None:
             msg = msg["message"]
             if msg.get("new_chat_member"):
