@@ -44,6 +44,7 @@ class MessageQuery:
                 self.group_name = msg.get("chat").get("title")
 
         self.username = msg["from"]["first_name"]
+        self.user_code = msg["from"]["username"]
         self.lang = msg["from"].get("language_code")
 
     def print_debug(self):
@@ -181,6 +182,11 @@ class MessageQuery:
             resp = "De rien"
         elif re.match(r'^[/]?(love|kiss|xoxo|<3|❤)( ?.*)?$', self.text, re.IGNORECASE):
             return "Thanks {0}, i have been code with love <3".format(self.username)
+        elif re.match(r'^[/]?(sale con)( ?.*)?$', self.text, re.IGNORECASE):
+            if re.match(r'^[/]?(Dramelac|LypsoSaleCon|MrTeishu)( ?.*)?$', self.user_code, re.IGNORECASE):
+                return "A votre service sale con ;)"
+            else:
+                return None
         else:
             return None
         return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
