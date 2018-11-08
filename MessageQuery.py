@@ -102,12 +102,12 @@ class MessageQuery:
 
     def __handle_message(self):
         # Send Hello message
-        if self.text == "/start" or self.text == "/help":
+        if re.match(r'^[/]?start$', self.text, re.IGNORECASE) or re.match(r'^[/]?help$', self.text, re.IGNORECASE):
             if self.lang == 'fr-FR' or self.lang == "fr":
                 return self.__print_help_fr()
             else:
                 return self.__print_help_en()
-        elif re.match(r'^[/\\]?[Pp][Ii][Nn][Gg]$', self.text):
+        elif re.match(r'^[/]?ping$', self.text, re.IGNORECASE):
             return "Pong"
         elif self.__hello_match() is not None:
             return self.__hello_match()
@@ -171,16 +171,19 @@ class MessageQuery:
         return "Query saved !"
 
     def __hello_match(self):
-        if re.match(r'^[/\\]?([hH][ea]llo|[hH]i|[gG]ood|[Hh]ey)( ?.*)?', self.text):
-            resp = "Hello " + self.username
-            resp += " !" if re.match(r'.*!$', self.text) else ""
-            return resp
-        elif re.match(r'^[/\\]?([sS]alut|[cC](ou)?[cC](ou)?|[bB]onjour|[Yy][oO]p?)( ?.*)?', self.text):
-            resp = "Bonjour " + self.username
-            resp += " !" if re.match(r'.*!$', self.text) else ""
-            return resp
+        if re.match(r'^[/]?(h[ea]llo|hi|good|hey)( ?.*)?$', self.text, re.IGNORECASE):
+            resp = "Hello"
+        elif re.match(r'^[/]?(salut|c(ou)?c(ou)?|bonjour|yop?)( ?.*)?$', self.text, re.IGNORECASE):
+            resp = "Bonjour"
+        elif re.match(r'^[/]?(th(ank)?[sx])( ?.*)?$', self.text, re.IGNORECASE):
+            resp = "You're welcome"
+        elif re.match(r'^[/]?(merci)( ?.*)?$', self.text, re.IGNORECASE):
+            resp = "De rien"
+        elif re.match(r'^[/]?(love|kiss|xoxo|<3|❤)( ?.*)?$', self.text, re.IGNORECASE):
+            return "Thanks {0}, i have been code with love <3".format(self.username)
         else:
             return None
+        return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
 
     def __print_help_fr(self):
         if self.is_group:
@@ -189,12 +192,12 @@ class MessageQuery:
         else:
             target = self.username
             prefix = ""
-        return "Bonjour " + target + " !\n" \
-                                            "Je suis @MrDelayBot !\n" \
-                                            "Je peux vous envoyer des messages dans le futur !\n" \
-                                            "Syntax : \n" \
-                                            "   \"" + prefix + "10s ce message me sera envoyé dans 10 secondes\"\n" \
-                                            "   \"" + prefix + "1j ce message me sera envoyé dans 1 jour\""
+        return "Bonjour {0} !\n" \
+               "Je suis @MrDelayBot !\n" \
+               "Je peux vous envoyer des messages dans le futur !\n" \
+               "Syntax : \n" \
+               "   \"{1}10s ce message me sera envoyé dans 10 secondes\"\n" \
+               "   \"{1}1j ce message me sera envoyé dans 1 jour\"".format(target, prefix)
 
     def __print_help_en(self):
         if self.is_group:
@@ -203,22 +206,22 @@ class MessageQuery:
         else:
             target = self.username
             prefix = ""
-        return "Hello " + target + " !\n" \
-                                          "I'm @MrDelayBot !\n" \
-                                          "I can send you message in the futur !\n" \
-                                          "Syntax : \n" \
-                                          "   \"" + prefix + "10s this message will be sent to you in 10 seconds\"\n" \
-                                          "   \"" + prefix + "1d this message will be sent to you in 1 day\""
+        return "Hello {0} !\n" \
+               "I'm @MrDelayBot !\n" \
+               "I can send you message in the futur !\n" \
+               "Syntax : \n" \
+               "   \"{1}10s this message will be sent to you in 10 seconds\"\n" \
+               "   \"{1}1d this message will be sent to you in 1 day\"".format(target, prefix)
 
     def __welcome_message_fr(self, users):
-        return "Bonjour " + users + "bienvenue sur " + self.group_name + " !"
+        return "Bonjour {0}enue sur {1} !".format(users, self.group_name)
 
     def __welcome_message_en(self, users):
-        return "Hello " + users + "welcome on " + self.group_name + " !"
+        return "Hello {0}welcome on {1} !".format(users, self.group_name)
 
     @staticmethod
     def __get_syntax_error():
         return "Syntax Error. Please follow the correct \n" \
-               "Exemple :\n" \
+               "Example :\n" \
                "  \"5mn your message\"\n" \
                "  \"24h your message\""
