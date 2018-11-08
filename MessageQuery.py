@@ -1,5 +1,7 @@
 import re
-from pprint import pprint
+from pprint import pprint, pformat
+
+from Logger import Logger
 
 
 class MessageQuery:
@@ -18,7 +20,7 @@ class MessageQuery:
             if msg.get("new_chat_member"):
                 self.new_users = msg["new_chat_members"]
             elif msg.get("left_chat_member"):
-                print("[DEBUG] Group member leaving is not supported")
+                Logger.g().debug("Group member leaving is not supported")
         elif msg.get("edited_message") is not None:
             msg = msg["edited_message"]
             self.is_edit = True
@@ -27,7 +29,7 @@ class MessageQuery:
             self.text = msg["inline_query"]["query"]
             self.is_inline = True
         else:
-            print("[ERROR] Message type not supported")
+            Logger.g().error("Message type not supported")
             pprint(msg)
             return
 
@@ -48,8 +50,7 @@ class MessageQuery:
         self.lang = msg["from"].get("language_code")
 
     def print_debug(self):
-        print("[DEBUG] Printing message data raw:")
-        pprint(self.debug_msg)
+        Logger.g().debug("Printing message data raw:\n", pformat(self.debug_msg))
 
     def handle(self):
         if self.is_edit:
@@ -76,7 +77,7 @@ class MessageQuery:
         # Inline message handling
         elif self.is_inline:
             response = self.__handle_query()
-            print('Response:', response)
+            # print('Response:', response)
             # TODO inline response
             return None
         return None
@@ -93,7 +94,7 @@ class MessageQuery:
             elif self.photo is not None:
                 msg += "Pictures are"
             else:
-                print("[DEBUG] Unrecognized message type")
+                Logger.g().info("Unrecognized message type")
                 self.print_debug()
                 msg += "This message is"
             msg += " not yet supported :'("
@@ -159,14 +160,14 @@ class MessageQuery:
             delay_time = time_nb * 86400
         elif time_type != "s" and time_type != "sec":
             resp = "Time type '" + time_type + "' not understood :/"
-            print("[ERROR]", resp)
+            Logger.g().error(resp)
             return resp
         # Seconds are default
 
         if self.chat_id is not None:
             self.bot.schedule_message(msg, delay_time, self.chat_id)
         else:
-            print("[DEBUG] Send", msg, "delayed", time_nb, delay_time)
+            Logger.g().debug("Send", msg, "delayed", time_nb, delay_time)
             return "Debug query"
 
         return "Query saved !"

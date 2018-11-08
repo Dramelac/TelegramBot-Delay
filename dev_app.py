@@ -1,9 +1,8 @@
 import time
 
 from Bot import Bot
-
 # Dev app - pooling messages
-
+from Logger import Logger
 
 if __name__ == '__main__':
     bot = Bot()
@@ -12,7 +11,7 @@ if __name__ == '__main__':
             try:
                 bot.pool_message()
             except Exception as e:
-                print("[ERROR] FATAL ERROR ! Crash handle : ", e)
+                Logger.g().critical("FATAL ERROR ! Crash handle : ", e)
             time.sleep(2)
     except KeyboardInterrupt:
-        print("Exiting")
+        Logger.g().info("Exiting")

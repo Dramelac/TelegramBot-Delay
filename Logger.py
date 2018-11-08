@@ -1,21 +1,26 @@
 import logging
+import os.path
 
 
 class Logger:
     __instance = None
 
     def __init__(self):
-        self.__appname = "delayboy"
+        self.__appname = "DelayBot"
         self.__logger = logging.getLogger(self.__appname)
         self.__logger.setLevel(logging.DEBUG)
 
-        self.__base_dir = "."
+        self.__base_dir = "./log"
+        self.__log_file = "{0}/{1}.log".format(self.__base_dir, self.__appname)
+        if not os.path.isfile(self.__log_file):
+            os.makedirs(self.__base_dir)
+            open(self.__log_file, 'w').close()
         # create file handler which logs even debug messages
-        file_handler = logging.FileHandler("{0}/{1}.log".format(self.__base_dir, self.__appname))
+        file_handler = logging.FileHandler(self.__log_file)
         file_handler.setLevel(logging.DEBUG)
         # create console handler with a higher log level
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.ERROR)
+        console_handler.setLevel(logging.INFO)
 
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(message)s')
@@ -26,18 +31,33 @@ class Logger:
         self.__logger.addHandler(file_handler)
         self.__logger.addHandler(console_handler)
 
-    def __del__(self):
-        pass
-
     @classmethod
-    def get_logger(cls):
+    def g(cls):
+        if Logger.__instance is None:
+            Logger.__instance = Logger()
         return cls.__instance
 
-    def info(self, log):
-        pass
+    def get(self):
+        return self.__logger
 
-    def error(self, log):
-        pass
+    @staticmethod
+    def __format(*args):
+        msg = ""
+        for i in args:
+            msg += str(i)
+        return msg
 
-    def custom(self, category, log):
-        pass
+    def info(self, *args):
+        self.__logger.info(Logger.__format(*args))
+
+    def debug(self, *args):
+        self.__logger.debug(Logger.__format(*args))
+
+    def warning(self, *args):
+        self.__logger.warning(Logger.__format(*args))
+
+    def error(self, *args):
+        self.__logger.error(Logger.__format(*args))
+
+    def critical(self, *args):
+        self.__logger.critical(Logger.__format(*args))

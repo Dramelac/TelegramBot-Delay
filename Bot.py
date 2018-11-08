@@ -1,10 +1,11 @@
 import _thread
 import sched
 import time
-from pprint import pprint
+from pprint import pformat
 
 import requests
 
+from Logger import Logger
 from MessageQuery import MessageQuery
 
 
@@ -17,7 +18,7 @@ class Bot:
         file = open("bot_token.txt", "r")
         self.__token = file.read()
         file.close()
-        print("Token loading :", self.__token)
+        Logger.g().debug("Token loading : ", self.__token)
 
         # Load bot information
         get_info = self.__request_API("getMe")
@@ -26,13 +27,14 @@ class Bot:
             self.first_name = get_info["result"]["first_name"]
             self.username = get_info["result"]["username"]
         else:
+            Logger.g().critical("Incorrect Token")
             raise Exception("Incorrect Token !")
 
         self.s = sched.scheduler(time.time, time.sleep)
         self.task_count = 0
 
         # Print bot information
-        print("Bot ", self.first_name, " / @", self.username, " | ID: ", self.id, " loaded successfully !", sep='')
+        Logger.g().info("Bot '", self.first_name, "' @", self.username, " | ID: ", self.id, " loaded successfully !")
 
     def __request_API(self, path, method="GET", data=None, silent=False):
         # Build URL
@@ -50,16 +52,15 @@ class Bot:
 
         # Debug log
         if not silent:
-            print("[API ", method, "] Requesting : ", path, sep='')
-            print("[API ", method, "] Result : ", sep='')
+            Logger.g().debug("API ", method, " - Requesting : ", path)
 
         result = f.json()
         if not silent:
-            pprint(result)
+            Logger.g().debug("API ", method, " - Result : \n", pformat(result))
 
         # Handle API error
         if result["ok"] is False and not silent:
-            print("[API ERROR]", result["description"])
+            Logger.g().error("API ERROR - ", result["description"])
         return result
 
     def pool_message(self):
@@ -74,8 +75,7 @@ class Bot:
 
         # Handle messages
         if result.get("result") is None:
-            print("[DEBUG] Unknown message:")
-            pprint(result)
+            Logger.g().debug("Unknown message: ", pformat(result))
             return
         for msg in result.get("result", []):
             self.__update_id = msg["update_id"] + 1
@@ -85,8 +85,7 @@ class Bot:
                 if resp is not None:
                     self.__send_message(resp, chat_id)
             except Exception as e:
-                print("[ERROR] Exception occurred !", e)
-                pprint(msg)
+                Logger.g().error("Exception occurred !", e, "\n", pformat(msg))
                 tmp = msg.get("message")
                 if tmp is not None:
                     if tmp.get("chat") is not None:
@@ -94,7 +93,7 @@ class Bot:
 
     def schedule_message(self, msg, seconds, chat_id):
         self.task_count += 1
-        print("[INFO] Scheduling message sending in", seconds, "seconds. Task count:", self.task_count)
+        Logger.g().info("Scheduling message sending in", seconds, "seconds. Task count:", self.task_count)
         _thread.start_new_thread(self.__thread_schedule, (msg, seconds, chat_id))
 
     def __thread_schedule(self, msg, seconds, chat_id):
@@ -104,5 +103,5 @@ class Bot:
     def __send_message(self, msg, chat_id, is_task=False):
         if is_task:
             self.task_count -= 1
-            print("[INFO] Task executed ! Task count:", self.task_count)
+            Logger.g().info("Task executed ! Task count:", self.task_count)
         return self.__request_API("sendMessage", method="POST", data={'text': msg, "chat_id": chat_id}, silent=True)
