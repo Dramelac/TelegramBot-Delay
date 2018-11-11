@@ -167,7 +167,7 @@ class MessageQuery:
         if self.chat_id is not None:
             self.bot.schedule_message(msg, delay_time, self.chat_id)
         else:
-            Logger.g().debug("Send", msg, "delayed", time_nb, delay_time)
+            Logger.g().debug("Send ", msg, " delayed ", time_nb, delay_time)
             return "Debug query"
 
         return "Query saved !"
@@ -188,6 +188,17 @@ class MessageQuery:
                 return "A votre service sale con ;)"
             else:
                 return None
+        elif re.match(r'^[/]?(make me a |fais moi un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
+            return """
+Here it is !
+   ( (
+    ) )
+.______.
+|          |]
+\          /
+ `-----'"""
+        elif re.match(r'^[/]?(make h(im|er) a |fais lui un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
+            return "Does he drink coffee ?"
         else:
             return None
         return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
@@ -221,7 +232,7 @@ class MessageQuery:
                "   \"{1}1d this message will be sent to you in 1 day\"".format(target, prefix)
 
     def __welcome_message_fr(self, users):
-        return "Bonjour {0}enue sur {1} !".format(users, self.group_name)
+        return "Bonjour {0}bienvenue sur {1} !".format(users, self.group_name)
 
     def __welcome_message_en(self, users):
         return "Hello {0}welcome on {1} !".format(users, self.group_name)

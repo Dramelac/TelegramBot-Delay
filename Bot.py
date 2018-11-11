@@ -85,7 +85,7 @@ class Bot:
                 if resp is not None:
                     self.__send_message(resp, chat_id)
             except Exception as e:
-                Logger.g().error("Exception occurred !", e, "\n", pformat(msg))
+                Logger.g().error("Exception occurred while responding ! ", e, "\n", pformat(msg))
                 tmp = msg.get("message")
                 if tmp is not None:
                     if tmp.get("chat") is not None:
@@ -93,7 +93,7 @@ class Bot:
 
     def schedule_message(self, msg, seconds, chat_id):
         self.task_count += 1
-        Logger.g().info("Scheduling message sending in", seconds, "seconds. Task count:", self.task_count)
+        Logger.g().info("Scheduling message sending in ", seconds, " seconds. Task count: ", self.task_count)
         _thread.start_new_thread(self.__thread_schedule, (msg, seconds, chat_id))
 
     def __thread_schedule(self, msg, seconds, chat_id):
@@ -103,5 +103,5 @@ class Bot:
     def __send_message(self, msg, chat_id, is_task=False):
         if is_task:
             self.task_count -= 1
-            Logger.g().info("Task executed ! Task count:", self.task_count)
+            Logger.g().info("Task executed ! Task count: ", self.task_count)
         return self.__request_API("sendMessage", method="POST", data={'text': msg, "chat_id": chat_id}, silent=True)
