@@ -199,6 +199,9 @@ Here it is !
  `-----'"""
         elif re.match(r'^[/]?(make h(im|er) a |fais lui un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
             return "Does he drink coffee ?"
+        elif re.match(r'^[/]?(SOS)( ?.*)?$', self.text, re.IGNORECASE):
+            return "Looks like someone needs help ! Have you considered asking google ?\n" \
+                   "WikiTITI is coming please wait..."
         else:
             return None
         return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
