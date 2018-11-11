@@ -200,8 +200,11 @@ Here it is !
         elif re.match(r'^[/]?(make h(im|er) a |fais lui un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
             return "Does he drink coffee ?"
         elif re.match(r'^[/]?(SOS)( ?.*)?$', self.text, re.IGNORECASE):
+            name = "TITI"
+            if re.match(r".*luci.*", self.text, re.IGNORECASE):
+                name = "LUCI"
             return "Looks like someone needs help ! Have you considered asking google ?\n" \
-                   "WikiTITI is coming please wait..."
+                   "Wiki{0} is coming please wait...".format(name)
         else:
             return None
         return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
