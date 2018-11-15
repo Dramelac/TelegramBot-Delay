@@ -184,7 +184,7 @@ class MessageQuery:
         elif re.match(r'^[/]?(love|kiss|xoxo|<3|❤)( ?.*)?$', self.text, re.IGNORECASE):
             return "Thanks {0}, i have been code with love <3".format(self.username)
         elif re.match(r'^[/]?(sale con)( ?.*)?$', self.text, re.IGNORECASE):
-            if re.match(r'^[/]?(Dramelac|LypsoSaleCon|MrTeishu)( ?.*)?$', self.user_code, re.IGNORECASE):
+            if re.match(r'^[/]?(Dramelac|LypsoSaleCon|MrTeishu|Akumarachi)( ?.*)?$', self.user_code, re.IGNORECASE):
                 return "A votre service sale con ;)"
             else:
                 return None
