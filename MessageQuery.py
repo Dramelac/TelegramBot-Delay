@@ -137,8 +137,7 @@ class MessageQuery:
         return None
 
     def __handle_query(self):
-        rule = r'^[/\\]?[ ]?(\d+)\s?(\w+)\s(.+)'
-        reout = re.match(rule, self.text)
+        reout = re.match(r'^[/\\]?[ ]?(\d+)\s?(\w+)\s(.+)', self.text, re.DOTALL)
         if reout is None:
             return self.__get_syntax_error()
         try:
@@ -165,6 +164,7 @@ class MessageQuery:
         # Seconds are default
 
         if self.chat_id is not None:
+            print("Schedul", msg)
             self.bot.schedule_message(msg, delay_time, self.chat_id)
         else:
             Logger.g().debug("Send ", msg, " delayed ", time_nb, delay_time)
