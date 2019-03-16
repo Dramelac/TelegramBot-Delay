@@ -1,5 +1,5 @@
 import re
-from pprint import pprint, pformat
+from pprint import pformat
 
 from Logger import Logger
 
@@ -29,8 +29,7 @@ class MessageQuery:
             self.text = msg["inline_query"]["query"]
             self.is_inline = True
         else:
-            Logger.g().error("Message type not supported")
-            pprint(msg)
+            Logger.g().error("Message type not supported\n", pformat(msg))
             return
 
         if not self.is_inline:
@@ -136,17 +135,8 @@ class MessageQuery:
 
         return None
 
-    def __handle_query(self):
-        reout = re.match(r'^[/\\]?[ ]?(\d+)\s?(\w+)\s(.+)', self.text, re.DOTALL)
-        if reout is None:
-            return self.__get_syntax_error()
-        try:
-            time_nb = int(reout.group(1))
-            time_type = reout.group(2)
-            msg = reout.group(3)
-        except IndexError:
-            return self.__get_syntax_error()
-
+    @staticmethod
+    def compute_time(time_nb, time_type):
         delay_time = time_nb
         # Minutes detection
         if time_type == "mn" or time_type == "m":
@@ -158,16 +148,37 @@ class MessageQuery:
         elif time_type == "j" or time_type == "d":
             delay_time = time_nb * 86400
         elif time_type != "s" and time_type != "sec":
+            raise TypeError
+        # Seconds are default
+        return delay_time
+
+    def __handle_query(self):
+        reout = re.match(r'^[/\\]?(\d+)([a-zA-Z]+)(\d+)?([a-zA-Z]+)?(\d+)?([a-zA-Z]+)?\s(.+)', self.text, re.DOTALL)
+        if reout is None:
+            return self.__get_syntax_error()
+        time_type = "unknown"
+        try:
+            delay_time = 0
+            for i in range(1, 6, 2):
+                if reout.group(i) is None:
+                    if i == 1:
+                        raise IndexError
+                    break
+                time_nb = int(reout.group(i))
+                time_type = reout.group(i + 1)
+                delay_time += MessageQuery.compute_time(time_nb, time_type)
+            msg = reout.group(7)
+        except IndexError:
+            return self.__get_syntax_error()
+        except TypeError:
             resp = "Time type '" + time_type + "' not understood :/"
             Logger.g().error(resp)
             return resp
-        # Seconds are default
 
         if self.chat_id is not None:
-            print("Schedul", msg)
             self.bot.schedule_message(msg, delay_time, self.chat_id)
         else:
-            Logger.g().debug("Send ", msg, " delayed ", time_nb, delay_time)
+            Logger.g().debug("Send ", msg, " delayed ", delay_time)
             return "Debug query"
 
         return "Query saved !"
@@ -221,7 +232,7 @@ Here it is !
                "Je peux vous envoyer des messages dans le futur !\n" \
                "Syntax : \n" \
                "   \"{1}10s ce message me sera envoyé dans 10 secondes\"\n" \
-               "   \"{1}1j ce message me sera envoyé dans 1 jour\"".format(target, prefix)
+               "   \"{1}1j2h ce message me sera envoyé dans 1 jour et 2 heures\"".format(target, prefix)
 
     def __print_help_en(self):
         if self.is_group:
@@ -235,7 +246,7 @@ Here it is !
                "I can send you message in the futur !\n" \
                "Syntax : \n" \
                "   \"{1}10s this message will be sent to you in 10 seconds\"\n" \
-               "   \"{1}1d this message will be sent to you in 1 day\"".format(target, prefix)
+               "   \"{1}1d2h this message will be sent to you in 1 day ans 2 hours\"".format(target, prefix)
 
     def __welcome_message_fr(self, users):
         return "Bonjour {0}bienvenue sur {1} !".format(users, self.group_name)
@@ -248,4 +259,4 @@ Here it is !
         return "Syntax Error. Please follow the correct \n" \
                "Example :\n" \
                "  \"5mn your message\"\n" \
-               "  \"24h your message\""
+               "  \"1d2h your message\""
