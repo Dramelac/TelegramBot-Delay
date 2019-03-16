@@ -1,6 +1,7 @@
 import _thread
 import sched
 import time
+import traceback
 from pprint import pformat
 
 import requests
@@ -79,13 +80,14 @@ class Bot:
             return
         for msg in result.get("result", []):
             self.__update_id = msg["update_id"] + 1
-            query = MessageQuery(msg, self)
             try:
+                query = MessageQuery(msg, self)
                 resp, chat_id = query.handle()
                 if resp is not None:
                     self.__send_message(resp, chat_id)
             except Exception as e:
-                Logger.g().error("Exception occurred while responding ! ", e, "\n", pformat(msg))
+                Logger.g().error("Exception occurred while responding !\nRequest:\n", pformat(msg),
+                                 "\n\nException details:\n", traceback.format_exc())
                 tmp = msg.get("message")
                 if tmp is not None:
                     if tmp.get("chat") is not None:
