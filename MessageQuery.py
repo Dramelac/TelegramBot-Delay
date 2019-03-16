@@ -46,8 +46,8 @@ class MessageQuery:
                 self.group_name = msg.get("chat").get("title")
 
         self.username = msg["from"]["first_name"]
-        self.user_code = msg["from"]["username"]
-        self.lang = msg["from"].get("language_code")
+        self.user_code = msg["from"].get("username", "")
+        self.lang = msg["from"].get("language_code", 'en')
 
     def print_debug(self):
         Logger.g().debug("Printing message data raw:\n", pformat(self.debug_msg))
