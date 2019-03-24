@@ -22,6 +22,7 @@ class Bot:
         Logger.g().debug("Token loading : ", self.__token)
 
         # Load bot information
+        self.__req = requests.session()
         get_info = self.__request_API("getMe")
         if get_info["ok"] is True:
             self.id = get_info["result"]["id"]
@@ -43,11 +44,11 @@ class Bot:
 
         # Handle HTTP method
         if method == "GET":
-            f = requests.get(url)
+            f = self.__req.get(url)
         elif method == "POST" and data is None:
             raise Exception("Data is missing")
         elif method == "POST":
-            f = requests.post(url, data)
+            f = self.__req.post(url, data)
         else:
             raise Exception("Method unsupported")
 
