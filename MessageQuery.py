@@ -107,16 +107,17 @@ class MessageQuery:
     def __handle_message(self):
         if self.reply and not self.reply_message.__is_reply_message_valid():
             return None
+        hell_match = self.__hello_match()
         # Send Hello message
         if re.match(r'^[/]?start$', self.text, re.IGNORECASE) or re.match(r'^[/]?help$', self.text, re.IGNORECASE):
             if self.lang == 'fr-FR' or self.lang == "fr":
                 return self.__print_help_fr()
             else:
                 return self.__print_help_en()
-        elif re.match(r'^[/]?ping$', self.text, re.IGNORECASE):
+        elif re.match(r'^[/]?ping(@' + self.bot.username + ')?$', self.text, re.IGNORECASE):
             return "Pong"
-        elif self.__hello_match() is not None:
-            return self.__hello_match()
+        elif hell_match is not None:
+            return hell_match
         elif self.reply:
             return self.__handle_reply()
         else:
@@ -263,7 +264,8 @@ class MessageQuery:
             resp = "De rien"
         elif re.match(r'^[/]?(love|kiss|xoxo|<3|❤)( ?.*)?$', self.text, re.IGNORECASE):
             return "Thanks {0}, i have been code with love <3".format(self.username)
-        elif re.match(r'^[/]?(make me a |fais moi un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
+        elif re.match(r'^[/]?(make me a |fais moi un )?(coffee?|caf[eé])(@' + self.bot.username + ')?( ?.*)?$',
+                      self.text, re.IGNORECASE):
             return """
 Here it is !
    ( (
