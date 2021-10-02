@@ -1,11 +1,13 @@
+#!/usr/bin/python3
 import time
 import traceback
 
 from requests.exceptions import ConnectionError
 
 from Bot import Bot
+from Logger import logger
+
 # Dev app - pooling messages
-from Logger import Logger
 
 if __name__ == '__main__':
     bot = Bot()
@@ -16,7 +18,7 @@ if __name__ == '__main__':
             except ConnectionError:
                 pass
             except Exception as e:
-                Logger.g().critical("FATAL ERROR ! Crash handle :\n", traceback.format_exc())
+                logger.critical("FATAL ERROR ! Crash handle :\n", traceback.format_exc())
             time.sleep(2)
     except KeyboardInterrupt:
-        Logger.g().info("Exiting")
+        logger.info("Exiting")

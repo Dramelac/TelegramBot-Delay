@@ -1,63 +1,95 @@
 import logging
-import os.path
+import os
+from typing import Any
+
+from rich.logging import RichHandler
 
 
-class Logger:
-    __instance = None
+class BotLogger(logging.getLoggerClass()):
+    appname = "DelayBot"
 
-    def __init__(self):
-        self.__appname = "DelayBot"
-        self.__logger = logging.getLogger(self.__appname)
-        self.__logger.setLevel(logging.DEBUG)
+    base_dir = "./log"
+    log_file = "{0}/{1}.log".format(base_dir, appname)
 
-        self.__base_dir = "./log"
-        self.__log_file = "{0}/{1}.log".format(self.__base_dir, self.__appname)
-        if not os.path.isfile(self.__log_file):
-            os.makedirs(self.__base_dir, exist_ok=True)
-            open(self.__log_file, 'w').close()
-        # create file handler which logs even debug messages
-        file_handler = logging.FileHandler(self.__log_file)
-        file_handler.setLevel(logging.DEBUG)
-        # create console handler with a higher log level
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+    def debug(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).debug("{}[D]{} {}".format("[yellow3]", "[/yellow3]", msg))
 
-        # create formatter and add it to the handlers
-        formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(message)s')
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
+    def verbose(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        if self.isEnabledFor(logging.getLevelName("VERBOSE")):
+            self._log(logging.getLevelName("VERBOSE"), "{}[V]{} {}".format("[blue]", "[/blue]", msg), ())
 
-        # add the handlers to the logger
-        self.__logger.addHandler(file_handler)
-        self.__logger.addHandler(console_handler)
+    def info(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).info("{}[*]{} {}".format("[bold blue]", "[/bold blue]", msg))
 
-    @classmethod
-    def g(cls):
-        if Logger.__instance is None:
-            Logger.__instance = Logger()
-        return cls.__instance
+    def warning(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).warning("{}[!]{} {}".format("[bold orange3]", "[/bold orange3]", msg))
 
-    def get(self):
-        return self.__logger
+    def error(self, msg: Any, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).error("{}[-]{} {}".format("[bold red]", "[/bold red]", msg))
 
-    @staticmethod
-    def __format(*args):
-        msg = ""
-        for i in args:
-            msg += str(i)
-        return msg
+    def exception(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).exception("{}[x]{} {}".format("[red3]", "[/red3]", msg))
 
-    def info(self, *args):
-        self.__logger.info(Logger.__format(*args))
+    def critical(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        super(BotLogger, self).critical("{}[X]{} {}".format("[bold dark_red]", "[/bold dark_red]", msg))
 
-    def debug(self, *args):
-        self.__logger.debug(Logger.__format(*args))
+    def success(self, *args: Any, **kwargs: Any) -> None:
+        msg = ''
+        for arg in args:
+            msg += str(arg)
+        if self.isEnabledFor(logging.getLevelName("SUCCESS")):
+            self._log(logging.getLevelName("SUCCESS"),
+                      "{}[+]{} {}".format("[bold green]", "[/bold green]", msg), ())
 
-    def warning(self, *args):
-        self.__logger.warning(Logger.__format(*args))
 
-    def error(self, *args):
-        self.__logger.error(Logger.__format(*args))
+if not os.path.isfile(BotLogger.log_file):
+    os.makedirs(BotLogger.base_dir, exist_ok=True)
 
-    def critical(self, *args):
-        self.__logger.critical(Logger.__format(*args))
+logging.setLoggerClass(BotLogger)
+
+logging.addLevelName(15, "VERBOSE")
+logging.addLevelName(25, "SUCCESS")
+
+# create file handler which logs even debug messages
+file_handler = logging.FileHandler(BotLogger.log_file)
+file_handler.setLevel(logging.DEBUG)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(message)s')
+file_handler.setFormatter(formatter)
+
+rich_handler = RichHandler(rich_tracebacks=True,
+                           show_time=False,
+                           markup=True,
+                           show_level=False,
+                           show_path=False)
+rich_handler.setLevel(logging.INFO)
+
+logging.basicConfig(
+    format="%(message)s",
+    handlers=[rich_handler, file_handler]
+)
+
+logger: BotLogger = logging.getLogger(BotLogger.appname)
+logger.setLevel(logging.DEBUG)

@@ -1,7 +1,7 @@
 import re
 from pprint import pformat
 
-from Logger import Logger
+from Logger import logger
 
 
 class MessageQuery:
@@ -22,7 +22,7 @@ class MessageQuery:
             if msg.get("new_chat_member"):
                 self.new_users = msg["new_chat_members"]
             elif msg.get("left_chat_member"):
-                Logger.g().debug("Group member leaving is not supported")
+                logger.debug("Group member leaving is not supported")
         elif msg.get("edited_message") is not None:
             msg = msg["edited_message"]
             self.is_edit = True
@@ -33,7 +33,7 @@ class MessageQuery:
         elif self.is_reply:
             self.text = msg.get('text')
         else:
-            Logger.g().error("Message type not supported\n", pformat(msg))
+            logger.error("Message type not supported\n", pformat(msg))
             return
 
         if not self.is_inline:
@@ -56,7 +56,7 @@ class MessageQuery:
         self.lang = msg["from"].get("language_code", 'en')
 
     def print_debug(self):
-        Logger.g().debug("Printing message data raw:\n", pformat(self.debug_msg))
+        logger.debug("Printing message data raw:\n", pformat(self.debug_msg))
 
     def handle(self):
         response_message = None
@@ -97,7 +97,7 @@ class MessageQuery:
             elif self.group_operation:
                 return None
             else:
-                Logger.g().info("Unrecognized message type")
+                logger.info("Unrecognized message type")
                 self.print_debug()
                 msg += "This message is"
             msg += " not yet supported :'("
@@ -149,7 +149,7 @@ class MessageQuery:
             if self.chat_id is not None:
                 self.bot.schedule_message(self.reply_message.text, delay_time, self.chat_id)
             else:
-                Logger.g().debug("Send ", self.reply_message.text, " delayed ", delay_time)
+                logger.debug("Send ", self.reply_message.text, " delayed ", delay_time)
                 return "Debug up query"
 
             return "Up saved !" if msg is None else msg
@@ -205,7 +205,7 @@ class MessageQuery:
         if self.chat_id is not None:
             self.bot.schedule_message(msg, delay_time, self.chat_id)
         else:
-            Logger.g().debug("Send ", msg, " delayed ", delay_time)
+            logger.debug("Send ", msg, " delayed ", delay_time)
             return "Debug query"
 
         return "Query saved !"
@@ -248,7 +248,7 @@ class MessageQuery:
                 delay_time += MessageQuery.compute_time(time_nb, time_type)
         except TypeError:
             resp = "Time type '" + time_type + "' not understood :/"
-            Logger.g().error(resp)
+            logger.error(resp)
             msg = resp
             delay_time = None  # Delay time must be set to none to send error message immediately
         return msg, delay_time
