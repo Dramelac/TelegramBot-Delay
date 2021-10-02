@@ -1,6 +1,8 @@
 import time
 import traceback
 
+from requests.exceptions import ConnectionError
+
 from Bot import Bot
 # Dev app - pooling messages
 from Logger import Logger
@@ -11,6 +13,8 @@ if __name__ == '__main__':
         while True:
             try:
                 bot.pool_message()
+            except ConnectionError:
+                pass
             except Exception as e:
                 Logger.g().critical("FATAL ERROR ! Crash handle :\n", traceback.format_exc())
             time.sleep(2)

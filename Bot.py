@@ -75,6 +75,20 @@ class Bot:
         result = self.__request_API(uri, silent=True)
         self.__update_id = None
 
+        # Error handling
+        error_code = result.get("error_code")
+        if error_code is not None:
+            # Catch server side error and 'Too Many Requests'
+            if error_code >= 500 or error_code == 429:
+                pass
+            # Duplicate bot instance ?
+            elif error_code == 409:
+                Logger.g().error('Conflict detected, Check if other bot is running ?')
+                # exit(0)
+            else:
+                Logger.g().error(f'Unknown response error : {result}')
+            return
+
         # Handle messages
         if result.get("result") is None:
             Logger.g().debug("Unknown message: ", pformat(result))

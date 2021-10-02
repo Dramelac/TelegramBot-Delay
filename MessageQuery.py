@@ -6,12 +6,13 @@ from Logger import Logger
 
 class MessageQuery:
 
-    def __init__(self, msg, bot):
+    def __init__(self, msg, bot, is_reply=False):
         self.bot = bot
         self.debug_msg = msg
         self.is_edit = False
         self.is_inline = False
         self.is_group = False
+        self.group_operation = False
         self.new_users = None
         self.group_name = None
 
@@ -38,9 +39,12 @@ class MessageQuery:
             self.document = msg.get("document")
             self.animation = msg.get("animation")
             self.photo = msg.get("photo")
-            self.reply = True if msg.get("reply_to_message") is not None else False
+            self.group_operation = msg.get('left_chat_member') is not None
+            self.reply = msg.get("reply_to_message") is not None
+            if self.reply:
+                self.reply_message = MessageQuery(msg.get("reply_to_message"), bot, is_reply=True)
             self.chat_id = msg["chat"]["id"]
-            self.is_group = True if msg.get("chat") is not None and msg.get("chat").get("type") == "group" else False
+            self.is_group = msg.get("chat") is not None and msg.get("chat").get("type") == "group"
             if self.is_group:
                 self.group_name = msg.get("chat").get("title")
 
@@ -52,34 +56,31 @@ class MessageQuery:
         Logger.g().debug("Printing message data raw:\n", pformat(self.debug_msg))
 
     def handle(self):
+        response_message = None
         if self.is_edit:
-            return "Command editing is not yet supported :'(", self.chat_id
-        if self.reply:
-            if self.is_group:
-                return None
-            return "Response is not yet supported :'(", self.chat_id
-
+            response_message = "Message editing is not supported :'("
+        elif self.reply:
+            if not self.is_group:
+                response_message = "Response is not yet supported :'("
         # Group custom
-        if self.is_group:
-            ret = self.__handle_group_specific()
-            if ret is not None:
-                return ret, self.chat_id
+        elif self.is_group:
+            response_message = self.__handle_group_specific()
+        else:
+            check = self.__type_error()
+            if check is not None:
+                response_message = check
 
-        check = self.__type_error()
-        if check is not None:
-            return check, self.chat_id
+            # Message handling
+            elif not self.is_inline:
+                response_message = self.__handle_message()
 
-        # Message handling
-        if not self.is_inline:
-            return self.__handle_message(), self.chat_id
-
-        # Inline message handling
-        elif self.is_inline:
-            response = self.__handle_query()
-            # print('Response:', response)
-            # TODO inline response
-            return None
-        return None
+            # Inline message handling
+            elif self.is_inline:
+                response = self.__handle_query()
+                # print('Response:', response)
+                # TODO inline response
+                return "Inline message are not yet supported :'("
+        return response_message, self.chat_id
 
     def __type_error(self):
         if self.text is None:
@@ -92,14 +93,15 @@ class MessageQuery:
                 msg += "Documents are"
             elif self.photo is not None:
                 msg += "Pictures are"
+            elif self.group_operation:
+                return None
             else:
                 Logger.g().info("Unrecognized message type")
                 self.print_debug()
                 msg += "This message is"
             msg += " not yet supported :'("
             return msg
-        else:
-            return None
+        return None
 
     def __handle_message(self):
         # Send Hello message
@@ -147,6 +149,9 @@ class MessageQuery:
         # Days detection
         elif time_type == "j" or time_type == "d":
             delay_time = time_nb * 86400
+        # Week detection
+        elif time_type == "w" or time_type == "week":
+            delay_time = time_nb * 86400 * 7
         elif time_type != "s" and time_type != "sec":
             raise TypeError
         # Seconds are default
@@ -194,11 +199,6 @@ class MessageQuery:
             resp = "De rien"
         elif re.match(r'^[/]?(love|kiss|xoxo|<3|❤)( ?.*)?$', self.text, re.IGNORECASE):
             return "Thanks {0}, i have been code with love <3".format(self.username)
-        elif re.match(r'^[/]?(sale con)( ?.*)?$', self.text, re.IGNORECASE):
-            if re.match(r'^[/]?(Dramelac|LypsoSaleCon|MrTeishu|Akumarachi)( ?.*)?$', self.user_code, re.IGNORECASE):
-                return "A votre service sale con ;)"
-            else:
-                return None
         elif re.match(r'^[/]?(make me a |fais moi un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
             return """
 Here it is !
@@ -210,12 +210,17 @@ Here it is !
  `-----'"""
         elif re.match(r'^[/]?(make h(im|er) a |fais lui un )?(coffee?|caf[eé])( ?.*)?$', self.text, re.IGNORECASE):
             return "Does he drink coffee ?"
-        elif re.match(r'^[/]?(SOS)( ?.*)?$', self.text, re.IGNORECASE):
-            name = "TITI"
-            if re.match(r".*luci.*", self.text, re.IGNORECASE):
-                name = "LUCI"
-            return "Looks like someone needs help ! Have you considered asking google ?\n" \
-                   "Wiki{0} is coming please wait...".format(name)
+        elif re.match(r'^[/]?(Dramelac|LypsoSaleCon|MrTeishu|Akumarachi)( ?.*)?$', self.user_code, re.IGNORECASE):
+            if re.match(r'^[/]?(SOS)( ?.*)?$', self.text, re.IGNORECASE):
+                name = "TITI"
+                if re.match(r".*luci.*", self.text, re.IGNORECASE):
+                    name = "LUCI"
+                return "Looks like someone needs help ! Have you considered asking google ?\n" \
+                       "Wiki{0} is coming please wait...".format(name)
+            elif re.match(r'^[/]?(sale con)( ?.*)?$', self.text, re.IGNORECASE):
+                return "A votre service sale con ;)"
+            else:
+                return None
         else:
             return None
         return "{0} {1} :){2}".format(resp, self.username, " !" if re.match(r'.*!$', self.text) else "")
