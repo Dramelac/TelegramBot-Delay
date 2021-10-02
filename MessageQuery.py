@@ -65,7 +65,8 @@ class MessageQuery:
         # Group custom
         elif self.is_group:
             response_message = self.__handle_group_specific()
-        else:
+
+        if response_message is None:
             check = self.__type_error()
             if check is not None:
                 response_message = check

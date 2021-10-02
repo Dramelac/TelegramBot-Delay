@@ -86,7 +86,7 @@ class Bot:
                 Logger.g().error('Conflict detected, Check if other bot is running ?')
                 # exit(0)
             else:
-                Logger.g().error(f'Unknown response error : {result}')
+                Logger.g().error('Unknown response error : {}'.format(result))
             return
 
         # Handle messages
