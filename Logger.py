@@ -13,7 +13,7 @@ class Logger:
         self.__base_dir = "./log"
         self.__log_file = "{0}/{1}.log".format(self.__base_dir, self.__appname)
         if not os.path.isfile(self.__log_file):
-            os.makedirs(self.__base_dir)
+            os.makedirs(self.__base_dir, exist_ok=True)
             open(self.__log_file, 'w').close()
         # create file handler which logs even debug messages
         file_handler = logging.FileHandler(self.__log_file)
